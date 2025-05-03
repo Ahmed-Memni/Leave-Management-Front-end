@@ -19,6 +19,7 @@ export const rootPaths = {
   createProfRoot: 'admin/create',
   RequestsListRoot: 'admin/requests',
   ManageRoot: 'admin/manage',
+  RlistRoot : 'admin/History'
 };
 
 // Public-facing absolute paths used in routes or navigation
@@ -43,6 +44,7 @@ const paths = {
   createProf: `/${rootPaths.createProfRoot}`,
   requestsList: `/${rootPaths.RequestsListRoot}`,
   manage: `/${rootPaths.ManageRoot}`,
+  History: `/${rootPaths.RlistRoot}`,
 };
 
 export default paths;

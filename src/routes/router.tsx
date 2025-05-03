@@ -20,6 +20,7 @@ const Dashboard = lazy(() => import('pages/DirectreurPages/Dashboard'));
 const Login = lazy(() => import('pages/authentication/Login'));
 const SignUp = lazy(() => import('pages/authentication/SignUp'));
 const ErrorPage = lazy(() => import('pages/error/ErrorPage'));
+const RListPage = lazy(() => import('pages/AdminPages/RequestsHistory'));
 
 const HomePage = lazy(() => import('pages/ProfessorPages/TimeTable'));
 const EditPage = lazy(() => import('pages/ProfessorPages/Edit-Profile'));
@@ -129,6 +130,10 @@ const routes: RouteObject[] = [
             path: rootPaths.ManageRoot,
             element: <ManagePage />,
           },
+          {
+            path: rootPaths.RlistRoot,
+            element : <RListPage/>
+          }
         ],
       },
     ],

@@ -30,14 +30,14 @@ export interface NavItem {
       icon: 'clarity:user-line',
       active: false,
     },
-  /* 
+   
     {
-      id: 7,
-      path: '#!',
-      title: 'Requests',
-      icon: 'bi:chat',
+      id: 9,
+      path: `${rootPaths.RlistRoot}`,
+      title: 'Requests History',
+      icon: 'ic:round-history',
       active: false,
-    },
+    },/* 
     {
       id: 8,
       path: '#!',
@@ -58,7 +58,7 @@ export interface NavItem {
       title: 'History',
       icon: 'ic:round-history',
       active: false,
-    }, */
+    },  */
     {
       id: 2,
       path: 'authentication/login',

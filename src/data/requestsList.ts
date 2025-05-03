@@ -1,5 +1,3 @@
-
-
 import { useState } from 'react';
 
 // Define the Request type properly
@@ -25,4 +23,4 @@ export const useRequestData = () => {
   const pendingRequests = requests.filter((request) => request.status === 'Pending');
 
   return { acceptedRequests, declinedRequests, pendingRequests };
-};
+};  

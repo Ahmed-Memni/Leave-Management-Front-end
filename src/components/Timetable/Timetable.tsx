@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Paper, Stack, Button, Typography, Modal } from '@mui/material';
-import LeaveApplicationForm from 'components/Applyleave/applyleave';
-import ApplyMakeUpSession from 'components/Applyleave/applyMakeupSession';
+import { Box, Paper, Stack, Button, Typography, Modal, TextField } from '@mui/material';
 
 interface TimetableSlot {
   className: string;
@@ -13,31 +11,34 @@ interface TimetableSlot {
 const Timetable = () => {
   const [modalMode, setModalMode] = useState<"leave" | "MakeUpSession" | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const [selectedSlot, setSelectedSlot] = useState<{ day: string; index: number | null } | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<{ day: string; index: number | null; startTime: string } | null>(null);
 
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  // Default time slots for display
+  // Default time slots for display (set by admin)
   const defaultTimeSlots = [
     '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
   ];
 
-  const [timetable, setTimetable] = useState<{ [key: string]: TimetableSlot[] }>({
-    Monday: [],
+  // Sample timetable data (set by admin, professor cannot modify)
+  const [timetable] = useState<{ [key: string]: TimetableSlot[] }>({
+    Monday: [
+      { className: 'Math 101', matiere: 'Algebra', place: 'Room 101', timeRange: { start: '09:00', end: '10:00' } },
+    ],
     Tuesday: [],
-    Wednesday: [],
+    Wednesday: [
+      { className: 'Physics 201', matiere: 'Mechanics', place: 'Room 202', timeRange: { start: '11:00', end: '12:00' } },
+    ],
     Thursday: [],
     Friday: [],
     Saturday: [],
   });
 
-  const handleClickOpen = (day: string, index: number | null, startTime?: string) => {
-    setSelectedSlot({ day, index });
+  const handleClickOpen = (day: string, index: number | null, startTime: string) => {
+    setSelectedSlot({ day, index, startTime });
     if (index !== null && timetable[day][index]) {
-      // Filled slot: Open leave request modal
       setModalMode('leave');
     } else {
-      // Free slot: Open make-up session request modal
       setModalMode('MakeUpSession');
     }
     setOpen(true);
@@ -49,40 +50,107 @@ const Timetable = () => {
     setSelectedSlot(null);
   };
 
-  // Helper function to get the next time slot (e.g., add 1 hour or use next default slot)
-  const getNextTime = (currentTime: string): string => {
-    const [hours, minutes] = currentTime.split(':').map(Number);
-    const time = new Date();
-    time.setHours(hours, minutes);
-    time.setHours(time.getHours() + 1); // Assume next slot is 1 hour later
-    const nextHours = time.getHours().toString().padStart(2, '0');
-    const nextMinutes = time.getMinutes().toString().padStart(2, '0');
-    const nextTime = `${nextHours}:${nextMinutes}`;
-    // Return the next default time slot if it exists, otherwise the calculated time
-    return defaultTimeSlots.find((t) => t > currentTime) || nextTime;
-  };
-
-  // Generate time slots, including default slots and user-defined times
+  // Generate time slots for display (based on admin-set slots and default times)
   const getTimeSlots = () => {
     const allTimes = new Set<string>(defaultTimeSlots);
     Object.values(timetable).forEach((daySlots) => {
       daySlots.forEach((slot) => {
         allTimes.add(slot.timeRange.start);
         allTimes.add(slot.timeRange.end);
-        // Add the next time slot after the end time
-        const nextTime = getNextTime(slot.timeRange.end);
-        if (nextTime) {
-          allTimes.add(nextTime);
-        }
       });
     });
     return Array.from(allTimes).sort();
   };
 
+  // Mock LeaveApplicationForm component (for leave requests)
+  const LeaveApplicationForm = ({ slotDetails, onClose }: { slotDetails: TimetableSlot; onClose: () => void }) => (
+    <Box>
+      <Typography color="text.primary">
+        Request Leave for {slotDetails.className} ({slotDetails.timeRange.start} - {slotDetails.timeRange.end})
+      </Typography>
+      <TextField label="Reason for Leave" fullWidth margin="normal" />
+      <Stack direction="row" spacing={2} mt={2}>
+        <Button variant="contained" onClick={onClose}>Submit</Button>
+        <Button onClick={onClose}>Cancel</Button>
+      </Stack>
+    </Box>
+  );
+
+  // ApplyMakeUpSession component for requesting make-up sessions with custom times
+  const ApplyMakeUpSession = ({ slotDetails, onClose }: { slotDetails: { day: string; time: string }; onClose: () => void }) => {
+    const [className, setClassName] = useState('');
+    const [matiere, setMatiere] = useState('');
+    const [place, setPlace] = useState('');
+    const [startTime, setStartTime] = useState(slotDetails.time);
+    const [endTime, setEndTime] = useState('');
+
+    const handleSubmit = () => {
+      if (className && matiere && place && startTime && endTime) {
+        // Simulate submitting the make-up session request (no timetable modification)
+        console.log('Make-up session request:', {
+          day: slotDetails.day,
+          className,
+          matiere,
+          place,
+          timeRange: { start: startTime, end: endTime },
+        });
+        onClose();
+      }
+    };
+
+    return (
+      <Box component="form" sx={{ mt: 2 }}>
+        <TextField
+          label="Class Name"
+          value={className}
+          onChange={(e) => setClassName(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Subject"
+          value={matiere}
+          onChange={(e) => setMatiere(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Location"
+          value={place}
+          onChange={(e) => setPlace(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Start Time (HH:MM)"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+          fullWidth
+          margin="normal"
+          placeholder="e.g., 14:30"
+        />
+        <TextField
+          label="End Time (HH:MM)"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+          fullWidth
+          margin="normal"
+          placeholder="e.g., 15:30"
+        />
+        <Stack direction="row" spacing={2} mt={2}>
+          <Button variant="contained" onClick={handleSubmit}>
+            Submit
+          </Button>
+          <Button onClick={onClose}>Cancel</Button>
+        </Stack>
+      </Box>
+    );
+  };
+
   return (
-    <Paper sx={{ p: { xs: 4, sm: 8 }, height: 1 }}>
+    <Paper sx={{ p: { xs: 4, sm: 8 }, height: 1, bgcolor: 'background.paper' }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={5} flexWrap="wrap" gap={3}>
-        <Typography variant="h4" color="common.white">
+        <Typography variant="h4" color="text.primary">
           Timetable
         </Typography>
       </Stack>
@@ -105,19 +173,12 @@ const Timetable = () => {
                 <td style={{ textAlign: 'center', padding: '10px', verticalAlign: 'top' }}>{time}</td>
                 {daysOfWeek.map((day) => {
                   const slot = timetable[day].find((s) => s.timeRange.start === time);
-                  const nextTime = getTimeSlots().find((t, i) => i > timeIndex) || getNextTime(time);
                   return (
                     <td key={day} style={{ textAlign: 'center', padding: '10px', verticalAlign: 'top' }}>
                       <Button
                         variant="outlined"
                         fullWidth
-                        onClick={() =>
-                          handleClickOpen(
-                            day,
-                            slot ? timetable[day].findIndex((s) => s === slot) : null,
-                            time
-                          )
-                        }
+                        onClick={() => handleClickOpen(day, slot ? timetable[day].findIndex((s) => s === slot) : null, time)}
                         sx={{
                           minHeight: '70px',
                           height: '70px',
@@ -142,20 +203,20 @@ const Timetable = () => {
 
       <Modal open={open} onClose={handleClose}>
         <Box sx={modalStyle}>
-          <Typography variant="h6" component="h2">
+          <Typography variant="h6" component="h2" color="text.primary">
             {modalMode === 'leave' ? 'Request Leave' : 'Request Make-up Session'}
           </Typography>
 
-          {modalMode === 'leave' && (
+          {modalMode === 'leave' && selectedSlot && selectedSlot.index !== null && timetable[selectedSlot.day][selectedSlot.index] && (
             <LeaveApplicationForm
-              slotDetails={selectedSlot && timetable[selectedSlot.day][selectedSlot.index!]}
+              slotDetails={timetable[selectedSlot.day][selectedSlot.index]}
               onClose={handleClose}
             />
           )}
 
           {modalMode === 'MakeUpSession' && (
             <ApplyMakeUpSession
-              slotDetails={{ day: selectedSlot?.day, time: selectedSlot ? getTimeSlots()[getTimeSlots().indexOf(timetable[selectedSlot.day][0]?.timeRange.start || '08:00')] : '08:00' }}
+              slotDetails={{ day: selectedSlot?.day || 'Monday', time: selectedSlot?.startTime || '08:00' }}
               onClose={handleClose}
             />
           )}
