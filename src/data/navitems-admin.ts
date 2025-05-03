@@ -24,7 +24,7 @@ export interface NavItem {
       active: false,
     },
   {
-      id: 2,
+      id: 4,
       path: `${rootPaths.ManageRoot}`,
       title: 'Manage Profiles',
       icon: 'clarity:user-line',

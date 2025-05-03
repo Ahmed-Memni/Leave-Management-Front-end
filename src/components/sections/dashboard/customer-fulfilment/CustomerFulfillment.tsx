@@ -1,14 +1,43 @@
-import { ReactElement, useCallback, useEffect, useRef } from 'react';
-import { Box, Button, Divider, Paper, Stack, Typography, alpha, useTheme } from '@mui/material';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { Box, Button, Divider, Paper, Stack, Typography, alpha, useTheme, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import EChartsReactCore from 'echarts-for-react/lib/core';
 import CustomerFulfillmentChart from './CustomerFulfillmentChart';
 import { currencyFormat } from 'helpers/format-functions';
 import { customerFulfillmentData } from 'data/chart-data/Chart';
 
+interface CustomerFulfillmentProps {
+  'This Month': number[];
+  'Last Month': number[];
+}
+
 const CustomerFulfillment = (): ReactElement => {
   const theme = useTheme();
   const chartRef = useRef<EChartsReactCore | null>(null);
+  const [selectedProfessor, setSelectedProfessor] = useState<string>('All Professors');
 
+  // Extract professor names
+  const professorNames = ['All Professors', ...customerFulfillmentData.map((prof) => prof.name)];
+
+  // Filter or aggregate data based on selected professor
+  const filteredData: CustomerFulfillmentProps = selectedProfessor === 'All Professors'
+    ? {
+        'This Month': customerFulfillmentData.reduce(
+          (acc, prof) => acc.map((val, i) => val + prof.data['This Month'][i]),
+          Array(7).fill(0)
+        ),
+        'Last Month': customerFulfillmentData.reduce(
+          (acc, prof) => acc.map((val, i) => val + prof.data['Last Month'][i]),
+          Array(7).fill(0)
+        ),
+      }
+    : customerFulfillmentData.find((prof) => prof.name === selectedProfessor)!.data;
+
+  // Log filteredData for debugging
+  useEffect(() => {
+    console.log('Filtered Data:', filteredData);
+  }, [filteredData]);
+
+  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       if (chartRef.current) {
@@ -19,24 +48,43 @@ const CustomerFulfillment = (): ReactElement => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [chartRef]);
+  }, []);
 
   const getTotalFulfillment = useCallback(
     (chartData: number[]) => {
       return currencyFormat(chartData.reduce((prev, current) => prev + current, 0));
     },
-    [customerFulfillmentData],
+    []
   );
+
+  const handleProfessorChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setSelectedProfessor(event.target.value as string);
+  };
 
   return (
     <Paper sx={{ p: { xs: 4, sm: 8 }, height: 1 }}>
-      <Typography variant="h4" color="common.white">
-        Absences vs Make up Sessions 
+      <Typography variant="h4" color="common.white" mb={1.25}>
+        Absences vs Make up Sessions
       </Typography>
+      <FormControl fullWidth sx={{ mb: 4, maxWidth: 300 }}>
+        <InputLabel id="professor-select-label">Professor</InputLabel>
+        <Select
+          labelId="professor-select-label"
+          value={selectedProfessor}
+          label="Professor"
+          onChange={handleProfessorChange}
+        >
+          {professorNames.map((name) => (
+            <MenuItem key={name} value={name}>
+              {name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <CustomerFulfillmentChart
         chartRef={chartRef}
         sx={{ height: '220px !important', flexGrow: 1 }}
-        data={customerFulfillmentData}
+        data={filteredData}
       />
       <Stack
         direction="row"
@@ -86,7 +134,7 @@ const CustomerFulfillment = (): ReactElement => {
             Make up Sessions
           </Button>
           <Typography variant="body2" color="common.white">
-            {getTotalFulfillment(customerFulfillmentData['This Month'])}
+            {getTotalFulfillment(filteredData['This Month'])}
           </Typography>
         </Stack>
         <Stack gap={1.25} alignItems="center">
@@ -117,10 +165,10 @@ const CustomerFulfillment = (): ReactElement => {
               />
             }
           >
-            Absences 
+            Absences
           </Button>
           <Typography variant="body2" color="common.white">
-            {getTotalFulfillment(customerFulfillmentData['Last Month'])}
+            {getTotalFulfillment(filteredData['Last Month'])}
           </Typography>
         </Stack>
       </Stack>

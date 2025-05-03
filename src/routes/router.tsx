@@ -1,37 +1,34 @@
-import { lazy, Suspense, ReactElement, PropsWithChildren } from 'react';
-import { Outlet, RouteObject, RouterProps, createBrowserRouter } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Outlet, RouteObject, createBrowserRouter } from 'react-router-dom';
 
+// ⏳ Loaders
 import PageLoader from 'components/loading/PageLoader';
 import Splash from 'components/loading/Splash';
-import { rootPaths } from './paths';
-import paths from './paths';
 
+// 🛣️ Paths
+import paths, { rootPaths } from './paths';
 
-const App = lazy<() => ReactElement>(() => import('App'));
+// 🧱 Layouts
+const App = lazy(() => import('App'));
+const MainLayout = lazy(() => import('layouts/main-layout'));
+const AuthLayout = lazy(() => import('layouts/auth-layout'));
+const ProfessorLayout = lazy(() => import('layouts/Professor-Layout'));
+const AdminLayout = lazy(() => import('layouts/admin-layout'));
 
-const MainLayout = lazy<({ children }: PropsWithChildren) => ReactElement>(
-  () => import('layouts/main-layout'),
-);
-const AuthLayout = lazy<({ children }: PropsWithChildren) => ReactElement>(
-  () => import('layouts/auth-layout'),
-);
-const ProfessorLayout = lazy<({ children }: PropsWithChildren) => ReactElement>(
-  () => import('layouts/Professor-Layout'),
-);
-const AdminLayout = lazy<({ children }: PropsWithChildren) => ReactElement>(
-  () => import('layouts/admin-layout'),
-);
+// 📄 Pages
+const Dashboard = lazy(() => import('pages/DirectreurPages/Dashboard'));
+const Login = lazy(() => import('pages/authentication/Login'));
+const SignUp = lazy(() => import('pages/authentication/SignUp'));
+const ErrorPage = lazy(() => import('pages/error/ErrorPage'));
 
-const Dashboard = lazy<() => ReactElement>(() => import('pages/DirectreurPages/Dashboard'));
-const Login = lazy<() => ReactElement>(() => import('pages/authentication/Login'));
-const SignUp = lazy<() => ReactElement>(() => import('pages/authentication/SignUp'));
-const ErrorPage = lazy<() => ReactElement>(() => import('pages/error/ErrorPage'));
-const HomePage = lazy<() => ReactElement>(() => import('pages/ProfessorPages/TimeTable')); // Corrected to HomePage cuz TimeTable both names gives an error 
-const EditPage = lazy<() => ReactElement>(() => import('pages/ProfessorPages/Edit-Profile'));
-const RequestPage = lazy<() => ReactElement>(() => import('pages/ProfessorPages/Requests'));
-const CreatePage = lazy<() => ReactElement>(() => import('pages/AdminPages/CreateProfessor'));
-const  RequestsListPage = lazy<() => ReactElement>(() => import('pages/AdminPages/RequestsTab'));
-const  ManagePage = lazy<() => ReactElement>(() => import('pages/AdminPages/ManageProfessors')); 
+const HomePage = lazy(() => import('pages/ProfessorPages/TimeTable'));
+const EditPage = lazy(() => import('pages/ProfessorPages/Edit-Profile'));
+const RequestPage = lazy(() => import('pages/ProfessorPages/Requests'));
+const Passw = lazy(() => import('pages/ProfessorPages/changepass'));
+
+const CreatePage = lazy(() => import('pages/AdminPages/CreateProfessor'));
+const RequestsListPage = lazy(() => import('pages/AdminPages/RequestsTab'));
+const ManagePage = lazy(() => import('pages/AdminPages/ManageProfessors'));
 
 const routes: RouteObject[] = [
   {
@@ -41,6 +38,7 @@ const routes: RouteObject[] = [
       </Suspense>
     ),
     children: [
+      // 🌐 Main Layout
       {
         path: paths.home,
         element: (
@@ -57,6 +55,8 @@ const routes: RouteObject[] = [
           },
         ],
       },
+
+      // 🔐 Auth Layout
       {
         path: rootPaths.authRoot,
         element: (
@@ -77,79 +77,74 @@ const routes: RouteObject[] = [
           },
         ],
       },
+
+      // 👨‍🏫 Professor Layout
       {
-        path: rootPaths.timetableRoot, // requests route for "Professor"
         element: (
           <ProfessorLayout>
             <Suspense fallback={<PageLoader />}>
-              <HomePage />
+              <Outlet />
             </Suspense>
           </ProfessorLayout>
         ),
+        children: [
+          {
+            path: rootPaths.timetableRoot,
+            element: <HomePage />,
+          },
+          {
+            path: rootPaths.editRoot,
+            element: <EditPage />,
+          },
+          {
+            path: rootPaths.changeRoot,
+            element: <Passw />,
+          },
+          {
+            path: rootPaths.requestsRoot,
+            element: <RequestPage />,
+          },
+        ],
       },
+
+      // 👨‍💼 Admin Layout
       {
-        path: rootPaths.editRoot, // editpage route for "Professor"
-        element: (
-          <ProfessorLayout>
-            <Suspense fallback={<PageLoader />}>
-              <EditPage />
-            </Suspense>
-          </ProfessorLayout>
-        ),
-      },
-      {
-        path: rootPaths.requestsRoot, // editpage route for "Professor"
-        element: (
-          <ProfessorLayout>
-            <Suspense fallback={<PageLoader />}>
-              <RequestPage />
-            </Suspense>
-          </ProfessorLayout>
-        ),
-      },
-      {
-        path: rootPaths.createProfRoot, // editpage route for "Professor"
-        element: (
-          <AdminLayout>
-            <Suspense fallback={<PageLoader />}>
-              <CreatePage />
-            </Suspense>
-          </AdminLayout>
-        ),
-      },
-      {
-        path: rootPaths.RequestsListRoot, // editpage route for "Professor"
         element: (
           <AdminLayout>
             <Suspense fallback={<PageLoader />}>
-              <RequestsListPage />
+              <Outlet />
             </Suspense>
           </AdminLayout>
         ),
-      },
-      {
-        path: rootPaths.ManageRoot, // editpage route for "Professor"
-        element: (
-          <AdminLayout>
-            <Suspense fallback={<PageLoader />}>
-              <ManagePage />
-            </Suspense>
-          </AdminLayout>
-        ),
+        children: [
+          {
+            path: rootPaths.createProfRoot,
+            element: <CreatePage />,
+          },
+          {
+            path: rootPaths.RequestsListRoot,
+            element: <RequestsListPage />,
+          },
+          {
+            path: rootPaths.ManageRoot,
+            element: <ManagePage />,
+          },
+        ],
       },
     ],
   },
+
+  // ❌ Error/Fallback route
   {
     path: '*',
-    element: <ErrorPage />,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <ErrorPage />
+      </Suspense>
+    ),
   },
 ];
 
-
-const options: { basename: string } = {
-  basename: '',
-};
-
-const router: Partial<RouterProps> = createBrowserRouter(routes, options);
+const router = createBrowserRouter(routes);
 
 export default router;

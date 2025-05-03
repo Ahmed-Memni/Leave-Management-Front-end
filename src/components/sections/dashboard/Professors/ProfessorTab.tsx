@@ -14,11 +14,10 @@ import {
   GridSlots,
   GridColDef,
   useGridApiRef,
- /*  GridActionsCellItem, */
   GridRenderCellParams,
   GridTreeNodeWithRender,
 } from '@mui/x-data-grid';
-import { rows as initialRows } from 'data/customer-data'; // Import rows from customer-data.ts
+import { rows as initialRows } from 'data/ProfessorData';
 import { stringAvatar } from 'helpers/string-avatar';
 import IconifyIcon from 'components/base/IconifyIcon';
 import CustomPagination from 'components/common/Pagination';
@@ -27,18 +26,10 @@ import UserProfileForm from 'components/Editprofile/editprofile';
 
 const CustomerTable = ({ searchText }: { searchText: string }): ReactElement => {
   const apiRef = useGridApiRef<GridApi>();
-  const [rows, /* setRows */] = useState(initialRows); // Initialize state with imported rows
+  const [rows, /* setRows */] = useState(initialRows);
   const [openDrawer, setOpenDrawer] = useState(false);
 
-  /* const handleOpenEdit = () => setOpenDrawer(true); */
   const handleCloseEdit = () => setOpenDrawer(false);
-
-  // Delete function to simulate deleting the row
- /*  const handleDelete = (id: number) => {
-    // Here, we're simulating the delete action by updating the state
-    const updatedRows = initialRows.filter((row) => row.id !== id); // This simulates removing from "data"
-    setRows(updatedRows); // Update the state to reflect this in the table
-  }; */
 
   const columns: GridColDef<any>[] = [
     {
@@ -95,44 +86,6 @@ const CustomerTable = ({ searchText }: { searchText: string }): ReactElement => 
       flex: 1,
       minWidth: 80,
     },
-   /*  {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Actions',
-      resizable: false,
-      flex: 1,
-      minWidth: 80,
-      getActions: (params) => [
-        <Tooltip title="Edit" key="edit">
-          <GridActionsCellItem
-            icon={
-              <IconifyIcon
-                icon="fluent:edit-32-filled"
-                color="text.secondary"
-                sx={{ fontSize: 'body1.fontSize', pointerEvents: 'none' }}
-              />
-            }
-            label="Edit"
-            size="small"
-            onClick={handleOpenEdit}
-          />
-        </Tooltip>,
-        <Tooltip title="Delete" key="delete">
-          <GridActionsCellItem
-            icon={
-              <IconifyIcon
-                icon="mingcute:delete-3-fill"
-                color="error.main"
-                sx={{ fontSize: 'body1.fontSize', pointerEvents: 'none' }}
-              />
-            }
-            label="Delete"
-            size="small"
-            onClick={() => handleDelete(params.row.id)} // Call handleDelete on click
-          />
-        </Tooltip>,
-      ],
-    }, */
   ];
 
   const visibleColumns = useMemo(
@@ -166,10 +119,10 @@ const CustomerTable = ({ searchText }: { searchText: string }): ReactElement => 
         columns={visibleColumns}
         autoHeight={false}
         rowHeight={56}
-        checkboxSelection
+        checkboxSelection={false}
         disableColumnMenu
         disableRowSelectionOnClick
-        rows={rows} // Pass rows from state
+        rows={rows}
         onResize={() => {
           apiRef.current.autosizeColumns({
             includeOutliers: true,
@@ -195,7 +148,6 @@ const CustomerTable = ({ searchText }: { searchText: string }): ReactElement => 
         }}
       />
 
-      {/* Drawer (popout) for User Profile Edit */}
       <Drawer anchor="right" open={openDrawer} onClose={handleCloseEdit}>
         <div style={{ width: 400, padding: 20 }}>
           <IconButton onClick={handleCloseEdit} style={{ float: 'right' }}>

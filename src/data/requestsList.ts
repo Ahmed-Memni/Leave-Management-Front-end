@@ -16,6 +16,7 @@ export const useRequestData = () => {
     { professorName: 'Prof. Jane Smith', date: '2025-04-05', reason: 'Research Meeting', status: 'Pending' },
     { professorName: 'Prof. Mark Lee', date: '2025-04-08', reason: 'Lab Session', status: 'Declined' },
     { professorName: 'Prof. Alice Brown', date: '2025-04-10', reason: 'Workshop on AI', status: 'Pending' },
+    
   ]);
 
   // Filter requests based on their status

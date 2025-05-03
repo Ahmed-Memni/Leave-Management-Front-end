@@ -61,7 +61,6 @@ const CustomerFulfillmentChart = ({
           },
         },
       },
-
       yAxis: [
         {
           type: 'value',
@@ -129,7 +128,7 @@ const CustomerFulfillmentChart = ({
         },
       ],
     }),
-    [],
+    [data, theme]
   );
 
   return <ReactEChart ref={chartRef} option={option} echarts={echarts} {...rest} />;

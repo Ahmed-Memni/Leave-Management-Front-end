@@ -12,14 +12,14 @@ import Level from 'components/sections/dashboard/level/Level';
 /* import LeaveApplicationForm from 'components/Applyleave/applyleave';
 import Timetable from 'components/Timetable/Timetable';
 import RequestsList from 'components/RequestsTabl/RequestsTabl'; */
-import TodaysSales from 'components/sections/dashboard/todays-sales/TodaySales';
+import Today from 'components/sections/dashboard/todays-sales/TodaySales';
 
 const Dashboard = (): ReactElement => {
   return (
     <>
       <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={3.5}>
         <Box gridColumn={{ xs: 'span 12', '2xl': 'span 12' }} order={{ xs: 0 }}>
-          <TodaysSales />
+          <Today />
         </Box>
         <Box gridColumn={{ xs: 'span 12', lg: 'span 12' }} order={{ xs: 1, '2xl': 1 }}>
           <Level />
@@ -49,7 +49,7 @@ const Dashboard = (): ReactElement => {
 {/*      
 
         <Box gridColumn={{ xs: 'span 12', lg: 'span 10' }} order={{ xs: 7 }}>
-          <RequestsList />
+          <RequestsList />t3q9rqwqgpxv
         </Box>
     <Box >
       <Timetable></Timetable>

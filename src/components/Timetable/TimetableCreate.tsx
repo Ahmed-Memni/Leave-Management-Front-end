@@ -7,40 +7,55 @@ interface TimetableSlot {
   className: string;
   matiere: string;
   place: string;
+  timeRange: { start: string; end: string };
 }
 
-const CreateTimetable = () => {
-  const [modalMode, setModalMode] = useState<"leave" | "edit" | "fill" | null |"MakeUpSession">(null);
+const Timetable = () => {
+  const [modalMode, setModalMode] = useState<"leave" | "edit" | "fill" | "MakeUpSession" | null>(null);
   const [showForm, setShowForm] = useState(false);
-
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const timeSlots = [
-    '08:00 - 09:00', '09:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00',
-    '14:00 - 15:00', '15:00 - 16:00', '16:00 - 17:00', '17:00 - 18:00'
-  ];
-
   const [open, setOpen] = useState<boolean>(false);
   const [selectedSlot, setSelectedSlot] = useState<{ day: string; index: number } | null>(null);
   const [className, setClassName] = useState<string>('');
   const [matiere, setMatiere] = useState<string>('');
   const [place, setPlace] = useState<string>('');
+  const [startTime, setStartTime] = useState<string>('');
+  const [endTime, setEndTime] = useState<string>('');
+
+  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  // Default time slots for display
+  const defaultTimeSlots = [
+    '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
+  ];
 
   const [timetable, setTimetable] = useState<{ [key: string]: TimetableSlot[] }>({
-    Monday: Array(8).fill({ className: '', matiere: '', place: '' }),
-    Tuesday: Array(8).fill({ className: '', matiere: '', place: '' }),
-    Wednesday: Array(8).fill({ className: '', matiere: '', place: '' }),
-    Thursday: Array(8).fill({ className: '', matiere: '', place: '' }),
-    Friday: Array(8).fill({ className: '', matiere: '', place: '' }),
-    Saturday: Array(8).fill({ className: '', matiere: '', place: '' }),
+    Monday: [],
+    Tuesday: [],
+    Wednesday: [],
+    Thursday: [],
+    Friday: [],
+    Saturday: [],
   });
 
-  const handleClickOpen = (day: string, index: number) => {
-    setSelectedSlot({ day, index });
-    setClassName(timetable[day][index].className);
-    setMatiere(timetable[day][index].matiere);
-    setPlace(timetable[day][index].place);
+  const handleClickOpen = (day: string, index: number | null, startTime?: string, endTime?: string) => {
+    if (index !== null && timetable[day][index]) {
+      setSelectedSlot({ day, index });
+      setClassName(timetable[day][index].className);
+      setMatiere(timetable[day][index].matiere);
+      setPlace(timetable[day][index].place);
+      setStartTime(timetable[day][index].timeRange.start);
+      setEndTime(timetable[day][index].timeRange.end);
+      setModalMode('edit');
+    } else {
+      setSelectedSlot({ day, index: timetable[day].length });
+      setClassName('');
+      setMatiere('');
+      setPlace('');
+      setStartTime(startTime || '');
+      setEndTime(endTime || '');
+      setModalMode('fill');
+    }
     setOpen(true);
-    setModalMode(null);
   };
 
   const handleClose = () => {
@@ -49,18 +64,39 @@ const CreateTimetable = () => {
     setShowForm(false);
   };
 
+  // Helper function to get the next time slot (e.g., add 1 hour or use next default slot)
+  const getNextTime = (currentTime: string): string => {
+    const [hours, minutes] = currentTime.split(':').map(Number);
+    const time = new Date();
+    time.setHours(hours, minutes);
+    time.setHours(time.getHours() + 1); // Assume next slot is 1 hour later
+    const nextHours = time.getHours().toString().padStart(2, '0');
+    const nextMinutes = time.getMinutes().toString().padStart(2, '0');
+    const nextTime = `${nextHours}:${nextMinutes}`;
+    // Return the next default time slot if it exists, otherwise the calculated time
+    return defaultTimeSlots.find((t) => t > currentTime) || nextTime;
+  };
+
   const handleSave = () => {
-    if (selectedSlot) {
+    if (selectedSlot && startTime && endTime) {
       const updatedTimetable = { ...timetable };
-      updatedTimetable[selectedSlot.day][selectedSlot.index] = {
+      const newSlot = {
         className,
         matiere,
         place,
+        timeRange: { start: startTime, end: endTime },
       };
+      if (modalMode === 'edit' && selectedSlot.index < updatedTimetable[selectedSlot.day].length) {
+        updatedTimetable[selectedSlot.day][selectedSlot.index] = newSlot;
+      } else {
+        updatedTimetable[selectedSlot.day].push(newSlot);
+      }
+      // Sort slots by start time
+      updatedTimetable[selectedSlot.day].sort((a, b) =>
+        a.timeRange.start.localeCompare(b.timeRange.start)
+      );
       setTimetable(updatedTimetable);
-      setOpen(false);
-      setModalMode(null);
-      setShowForm(false);
+      handleClose();
     }
   };
 
@@ -71,9 +107,8 @@ const CreateTimetable = () => {
     []
   );
 
-  const handleButtonClick = (buttonType: 'leave' | 'edit' | 'fill'|'MakeUpSession') => {
-    const isContentFilled = Boolean(className && matiere && place);
-
+  const handleButtonClick = (buttonType: 'leave' | 'edit' | 'fill' | 'MakeUpSession') => {
+    const isContentFilled = Boolean(className && matiere && place && startTime && endTime);
     if (buttonType === 'leave' && isContentFilled) {
       setModalMode('leave');
       setShowForm(true);
@@ -81,12 +116,27 @@ const CreateTimetable = () => {
       setModalMode('edit');
     } else if (buttonType === 'fill' && !isContentFilled) {
       setModalMode('fill');
-    }
-    else if (buttonType == 'MakeUpSession' && !isContentFilled){
+    } else if (buttonType === 'MakeUpSession' && !isContentFilled) {
       setModalMode('MakeUpSession');
     }
-
     setOpen(true);
+  };
+
+  // Generate time slots, including default slots and user-defined times
+  const getTimeSlots = () => {
+    const allTimes = new Set<string>(defaultTimeSlots);
+    Object.values(timetable).forEach((daySlots) => {
+      daySlots.forEach((slot) => {
+        allTimes.add(slot.timeRange.start);
+        allTimes.add(slot.timeRange.end);
+        // Add the next time slot after the end time
+        const nextTime = getNextTime(slot.timeRange.end);
+        if (nextTime) {
+          allTimes.add(nextTime);
+        }
+      });
+    });
+    return Array.from(allTimes).sort();
   };
 
   return (
@@ -103,58 +153,87 @@ const CreateTimetable = () => {
             <tr>
               <th style={{ textAlign: 'center', padding: '10px', width: '15%' }}>Time</th>
               {daysOfWeek.map((day) => (
-                <th key={day} style={{ textAlign: 'center', padding: '10px', width: '14%' }}>{day}</th>
+                <th key={day} style={{ textAlign: 'center', padding: '10px', width: '14%' }}>
+                  {day}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {timeSlots.map((time, index) => (
-              <tr key={index}>
+            {getTimeSlots().map((time, timeIndex) => (
+              <tr key={timeIndex}>
                 <td style={{ textAlign: 'center', padding: '10px', verticalAlign: 'top' }}>{time}</td>
-                {daysOfWeek.map((day) => (
-                  <td key={day} style={{ textAlign: 'center', padding: '10px', verticalAlign: 'top' }}>
-                    <Button
-                      variant="outlined"
-                      fullWidth
-                      onClick={() => handleClickOpen(day, index)}
-                      sx={{
-                        minHeight: '70px',
-                        height: '70px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        textTransform: 'none',
-                      }}
-                    >
-                      {timetable[day][index].className || timetable[day][index].matiere || timetable[day][index].place
-                        ? `${timetable[day][index].className} - ${timetable[day][index].matiere} - ${timetable[day][index].place}`
-                        : 'Free'}
-                    </Button>
-                  </td>
-                ))}
+                {daysOfWeek.map((day) => {
+                  const slot = timetable[day].find(
+                    (s) => s.timeRange.start === time
+                  );
+                  const nextTime = getTimeSlots().find((t, i) => i > timeIndex) || getNextTime(time);
+                  return (
+                    <td key={day} style={{ textAlign: 'center', padding: '10px', verticalAlign: 'top' }}>
+                      {slot ? (
+                        <Button
+                          variant="outlined"
+                          fullWidth
+                          onClick={() =>
+                            handleClickOpen(
+                              day,
+                              timetable[day].findIndex((s) => s === slot),
+                              time
+                            )
+                          }
+                          sx={{
+                            minHeight: '70px',
+                            height: '70px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            textTransform: 'none',
+                          }}
+                        >
+                          {`${slot.className} - ${slot.matiere} - ${slot.place} (${slot.timeRange.start} - ${slot.timeRange.end})`}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outlined"
+                          fullWidth
+                          onClick={() => handleClickOpen(day, null, time, nextTime)}
+                          sx={{
+                            minHeight: '70px',
+                            height: '70px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            textTransform: 'none',
+                          }}
+                        >
+                          Free
+                        </Button>
+                      )}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
         </table>
       </Box>
 
-      {/* Modal for editing or leave application */}
       <Modal open={open} onClose={handleClose}>
         <Box sx={modalStyle}>
           <Typography variant="h6" component="h2">
-            Edit Timetable Slot
+            {modalMode === 'edit' ? 'Edit Timetable Slot' : 'Add Timetable Slot'}
           </Typography>
 
-          {modalMode === "leave" && showForm && (
-            <LeaveApplicationForm onClose={() => {
-              setShowForm(false);
-              setModalMode(null);
-            }} />
+          {modalMode === 'leave' && showForm && (
+            <LeaveApplicationForm
+              onClose={() => {
+                setShowForm(false);
+                setModalMode(null);
+              }}
+            />
           )}
-          
 
-
-          {(modalMode === "edit" || modalMode === "fill") && (
+          {(modalMode === 'edit' || modalMode === 'fill') && (
             <>
               <TextField
                 label="Class Name"
@@ -163,7 +242,6 @@ const CreateTimetable = () => {
                 fullWidth
                 sx={{ mb: 2 }}
               />
-
               <TextField
                 label="Matière"
                 value={matiere}
@@ -171,7 +249,6 @@ const CreateTimetable = () => {
                 fullWidth
                 sx={{ mb: 2 }}
               />
-
               <TextField
                 label="Place"
                 value={place}
@@ -179,7 +256,22 @@ const CreateTimetable = () => {
                 fullWidth
                 sx={{ mb: 2 }}
               />
-
+              <TextField
+                label="Start Time (HH:MM)"
+                value={startTime}
+                onChange={(e) => handleChange(e, setStartTime)}
+                fullWidth
+                sx={{ mb: 2 }}
+                placeholder="e.g., 08:00"
+              />
+              <TextField
+                label="End Time (HH:MM)"
+                value={endTime}
+                onChange={(e) => handleChange(e, setEndTime)}
+                fullWidth
+                sx={{ mb: 2 }}
+                placeholder="e.g., 09:00"
+              />
               <Stack direction="row" spacing={2} mt={2}>
                 <Button onClick={handleClose}>Cancel</Button>
                 <Button onClick={handleSave}>Save</Button>
@@ -187,24 +279,26 @@ const CreateTimetable = () => {
             </>
           )}
 
-{modalMode === "MakeUpSession" && (
-            <ApplyMakeUpSession onClose={() => {
-              setShowForm(false);
-              setModalMode(null);
-            }} />
+          {modalMode === 'MakeUpSession' && (
+            <ApplyMakeUpSession
+              onClose={() => {
+                setShowForm(false);
+                setModalMode(null);
+              }}
+            />
           )}
 
           {!modalMode && (
             <Stack direction="row" spacing={2} mt={3}>
-              {Boolean(className && matiere && place) ? (
+              {Boolean(className && matiere && place && startTime && endTime) ? (
                 <>
-                  {/* <Button onClick={() => handleButtonClick("leave")}>Apply for a Leave</Button> */}
-                  <Button onClick={() => handleButtonClick("edit")}>Edit</Button>
+                  <Button onClick={() => handleButtonClick('leave')}>Apply for a Leave</Button>
                 </>
               ) : (
                 <>
-                  {/* <Button onClick={() => handleButtonClick("MakeUpSession")}>Apply for a Make-up Session</Button> */}
-                  <Button onClick={() => handleButtonClick("fill")}>Fill</Button>
+                  <Button onClick={() => handleButtonClick('MakeUpSession')}>
+                    Apply for a Make-up Session
+                  </Button>
                 </>
               )}
             </Stack>
@@ -215,7 +309,6 @@ const CreateTimetable = () => {
   );
 };
 
-// Modal style
 const modalStyle = {
   position: 'absolute',
   top: '50%',
@@ -227,4 +320,4 @@ const modalStyle = {
   p: 4,
 };
 
-export default CreateTimetable;
+export default Timetable;

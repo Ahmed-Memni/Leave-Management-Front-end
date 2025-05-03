@@ -24,14 +24,14 @@ export interface NavItem {
       active: true,
     },
   
-  /*   {
-      id: 7,
-      path: '#!',
-      title: 'Requests',
-      icon: 'bi:chat',
-      active: false,
-    }, 
     {
+      id: 7,
+      path:`${rootPaths.changeRoot}` ,
+      title: 'Password',
+      icon: 'bi:chat',
+      active: true,
+    }, 
+   /*  {
       id: 8,
       path: '#!',
       title: 'Settings',
@@ -44,7 +44,7 @@ export interface NavItem {
       title: 'Favourite',
       icon: 'clarity:favorite-line',
       active: false,
-    },*/
+    }, */
     {
       id: 10,
       path: `${rootPaths.requestsRoot}`,
@@ -53,7 +53,7 @@ export interface NavItem {
       active: false,
     }, 
     {
-      id: 2,
+      id: 11,
       path: 'authentication/login',
       title: 'Login',
       icon: 'tabler:login',

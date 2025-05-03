@@ -19,7 +19,7 @@ import {
   GridTreeNodeWithRender,
   GridActionsCellItem,
 } from '@mui/x-data-grid';
-import { rows as initialRows } from 'data/customer-data'; // Import rows from customer-data.ts
+import { rows as initialRows } from 'data/ProfessorData'; // Import rows from customer-data.ts
 import { stringAvatar } from 'helpers/string-avatar';
 import IconifyIcon from 'components/base/IconifyIcon';
 import CustomPagination from 'components/common/Pagination';

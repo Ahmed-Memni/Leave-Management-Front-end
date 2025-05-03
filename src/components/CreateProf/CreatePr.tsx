@@ -154,7 +154,7 @@ const CreateProf = () => {
         }}
       />
 {/* i need to take off this button and add it down under timetable and i need to add a variable that saves timetable  so i can console.log or give it to my classmate to change do the backend code  */}
-     {/*  <Box mt={4} display="flex" justifyContent="flex-end">
+      <Box mt={4} display="flex" justifyContent="flex-end">
         <Button
           variant="contained"
           onClick={handleSubmit}
@@ -174,7 +174,7 @@ const CreateProf = () => {
         >
           Create 
         </Button>
-      </Box> */}
+      </Box>
     </Paper>
   );
 };

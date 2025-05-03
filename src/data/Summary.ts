@@ -1,9 +1,8 @@
-import totalSales from 'assets/images/todays-sales/total-sales.png';
-import totalOrder from 'assets/images/todays-sales/total-order.png';
-import productSold from 'assets/images/todays-sales/product-sold.png';
-import newCustomer from 'assets/images/todays-sales/new-customer.png';
+import totalAbsences from 'assets/images/todays-sales/Accpeted.png';
+import Accepted from 'assets/images/todays-sales/MakeUp.png';
+import Makeup from 'assets/images/todays-sales/New.png';
 
-export interface SaleItem {
+export interface Item {
   id?: number;
   icon: string;
   title: string;
@@ -12,10 +11,10 @@ export interface SaleItem {
   color: string;
 }
 
-const salesData: SaleItem[] = [
+const Data: Item[] = [
   {
     id: 1,
-    icon: totalSales,
+    icon: totalAbsences,
     title: '50',
     subtitle: 'Total Absents Requested',
     increment: 10,
@@ -23,7 +22,7 @@ const salesData: SaleItem[] = [
   },
   {
     id: 2,
-    icon: totalOrder,
+    icon: Accepted,
     title: '25',
     subtitle: 'Total Absents Accepted',
     increment: 5,
@@ -31,7 +30,7 @@ const salesData: SaleItem[] = [
   },
   {
     id: 3,
-    icon: productSold,
+    icon: Makeup,
     title: '9',
     subtitle: 'Total Additional Sessions ',
     increment: 2,
@@ -40,4 +39,4 @@ const salesData: SaleItem[] = [
   
 ];
 
-export default salesData;
+export default Data;

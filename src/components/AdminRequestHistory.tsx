@@ -2,8 +2,8 @@ import { Paper, Typography, List, ListItem, ListItemText, Divider, Dialog, Dialo
 import { useRequestData, Request } from 'data/requestsList';
 import { useState } from 'react';
 
-const RequestsList = () => {
-  const { acceptedRequests, declinedRequests, pendingRequests } = useRequestData();
+const AdminRequestHistory = () => {
+  const { acceptedRequests, declinedRequests } = useRequestData();
   const [open, setOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
 
@@ -54,63 +54,65 @@ const RequestsList = () => {
       }}
     >
       <Typography variant="h4" color="common.white" mb={6}>
-        Submitted Requests
+        Request History
       </Typography>
 
       {/* Accepted Requests */}
       <Typography variant="h6" color="common.white" mb={2}>
         Accepted Requests
       </Typography>
-      {renderRequestList(acceptedRequests)}
+      {acceptedRequests.length > 0 ? renderRequestList(acceptedRequests) : (
+        <Typography variant="body1" color="common.white">
+          No accepted requests.
+        </Typography>
+      )}
 
       {/* Declined Requests */}
       <Typography variant="h6" color="common.white" mt={4} mb={2}>
         Declined Requests
       </Typography>
-      {renderRequestList(declinedRequests)}
-
-      {/* Pending Requests */}
-      <Typography variant="h6" color="common.white" mt={4} mb={2}>
-        Pending Requests
-      </Typography>
-      {renderRequestList(pendingRequests)}
+      {declinedRequests.length > 0 ? renderRequestList(declinedRequests) : (
+        <Typography variant="body1" color="common.white">
+          No declined requests.
+        </Typography>
+      )}
 
       {/* Dialog for request details */}
       <Dialog
-  open={open}
-  onClose={handleClose}
-  PaperProps={{
-    sx: {
-      backgroundColor: '#282339',
-    },
-  }}
->
-  <DialogTitle sx={{ backgroundColor: '#282339', color: 'common.white' }}>
-    Request Details
-  </DialogTitle>
-  <DialogContent sx={{ backgroundColor: 'background.default' }}>
-    {selectedRequest && (
-      <Box>
-        <Typography variant="h6" color="common.white">
-          Professor: {selectedRequest.professorName}
-        </Typography>
-        <Typography variant="body1" color="common.white" mb={2}>
-          Date: {selectedRequest.date}
-        </Typography>
-        <Typography variant="body1" color="common.white">
-          Reason: {selectedRequest.reason}
-        </Typography>
-      </Box>
-    )}
-  </DialogContent>
-  <DialogActions sx={{ backgroundColor: 'background.default' }}>
-    <Button onClick={handleClose} color="primary">
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
+        open={open}
+        onClose={handleClose}
+        PaperProps={{
+          sx: {
+            backgroundColor: '#282339',
+          },
+        }}
+      >
+        <DialogTitle sx={{ backgroundColor: '#282339', color: 'common.white' }}>
+          Request Details
+        </DialogTitle>
+        <DialogContent sx={{ backgroundColor: 'background.default' }}>
+          {selectedRequest && (
+            <Box>
+              <Typography variant="h6" color="common.white">
+                Professor: {selectedRequest.professorName}
+              </Typography>
+              <Typography variant="body1" color="common.white" mb={2}>
+                Date: {selectedRequest.date}
+              </Typography>
+              <Typography variant="body1" color="common.white">
+                Reason: {selectedRequest.reason}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ backgroundColor: 'background.default' }}>
+          <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };
 
-export default RequestsList;
+export default AdminRequestHistory;
